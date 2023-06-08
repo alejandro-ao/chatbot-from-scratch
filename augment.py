@@ -39,13 +39,14 @@ def augment_df(df):
         # Paraphrase the question and answer
         paraphrased_question = paraphrase_sentence(row['question'])
         paraphrased_answer = paraphrase_sentence(row['answer'])
+        tag = row['tag']
 
         # Add the original question and answer to the augmented dataframe
         augmented_df = augmented_df.append(
-            {'question': row['question'], 'answer': row['answer']}, ignore_index=True)
+            {'question': row['question'], 'answer': row['answer'], 'tag': tag}, ignore_index=True)
 
         # Add the paraphrased question and answer to the augmented dataframe
         augmented_df = augmented_df.append(
-            {'question': paraphrased_question, 'answer': paraphrased_answer}, ignore_index=True)
+            {'question': paraphrased_question, 'answer': paraphrased_answer, 'tag': tag}, ignore_index=True)
 
     return augmented_df

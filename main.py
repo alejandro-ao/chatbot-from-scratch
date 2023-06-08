@@ -10,11 +10,12 @@ def get_json_data():
 
 def main():
     df = get_json_data()
-    
+    df['tag'] = 10
+
     print("Original dataframe:", df.head())
-    
+
     augmented_df = augment_df(df.head())
-    
+
     print("Augmented dataframe:", augmented_df.head(10))
 
 
