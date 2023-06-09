@@ -1,6 +1,5 @@
 import re
 import nltk
-import pandas as pd
 import numpy as np
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -22,6 +21,7 @@ class QuestionAnsweringModel:
         self.model = model
         self.tfidf_vectorizer = tfidf_vectorizer
         self.X = X
+        self.df = df
   
     def preprocess_text(self, text):
         text = text.lower()
@@ -72,7 +72,7 @@ class QuestionAnsweringModel:
 
         tfidf_vectorizer = self.tfidf_vectorizer
         tfidf_matrix = self.X
-        data = df
+        data = self.df
 
         preprocessed_question = self.preprocess_text(question)
 
@@ -91,11 +91,11 @@ class QuestionAnsweringModel:
 
 
 
-df = pd.read_csv("data/labeled-data.csv")
-model = QuestionAnsweringModel(df)
+# df = pd.read_csv("data/labeled-data.csv")
+# model = QuestionAnsweringModel(df)
 
 
-question = "What is Amazon Sagemaker?"
-response = model.generate_response(question)
-print("Question:", question)
-print("Answer:", response)
+# question = "What is Amazon Sagemaker?"
+# response = model.generate_response(question)
+# print("Question:", question)
+# print("Answer:", response)

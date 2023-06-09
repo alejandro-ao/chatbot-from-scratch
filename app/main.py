@@ -11,7 +11,7 @@ class ChatBot:
         self.conversation = None
         self.history = None
         
-        df = pd.read_csv("data/labeled-data.csv")
+        df = pd.read_csv("data/final.csv", sep=";")
         self.model = QuestionAnsweringModel(df)
 
     def main(self):
