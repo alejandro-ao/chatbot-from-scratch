@@ -1,5 +1,4 @@
 import logging
-import os
 from dotenv import load_dotenv
 import streamlit as st
 from htmlTemplates import css, bot_template, user_template
