@@ -1,5 +1,6 @@
 import pandas as pd
-from augment import augment_df
+from generate import QuestionAnsweringModel
+import pickle
 
 
 def get_json_data():
@@ -9,9 +10,15 @@ def get_json_data():
 
 
 def main():
-    df = pd.read_csv("data/labeled-data.csv")
-
-    # augmented_df = augment_df(df)
+    df = pd.read_csv("data/final.csv")
+    model = QuestionAnsweringModel(df)
+    
+    # export model
+    with open("model.pkl", "wb") as f:
+        pickle.dump(model, f)
+    
+    
+    
 
         
 if __name__ == "__main__":
