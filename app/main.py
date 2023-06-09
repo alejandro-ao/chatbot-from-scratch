@@ -12,7 +12,8 @@ class ChatBot:
         self.history = None
         
         df = pd.read_csv("data/final.csv", sep=";")
-        self.model = QuestionAnsweringModel(df)
+        if "model" not in st.session_state:
+          st.session_state.model = QuestionAnsweringModel(df)
 
     def main(self):
         logging.basicConfig(level=logging.INFO)
@@ -34,7 +35,7 @@ class ChatBot:
         self.load_ui()
 
     def generate_response(self, user_question):
-        response = self.model.generate_response(user_question)
+        response = st.session_state.model.generate_response(user_question)
         return response
 
     def load_css_styles(self):
