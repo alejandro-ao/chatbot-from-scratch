@@ -76,8 +76,8 @@ class ChatBot:
 
         self.display_sidebar()
 
-        st.title('Hello, I am an Amazon Sagework Expert 👩🏻‍🦰')
-        user_question = st.text_input('Ask a question about Amazon Sagework:')
+        st.title('Hello, I am an Amazon SageMaker Expert 👩🏻‍🦰')
+        user_question = st.text_input('Ask a question about Amazon SageMaker:')
 
         self.handle_user_input(user_question)
 
