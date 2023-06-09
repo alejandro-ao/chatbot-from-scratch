@@ -89,6 +89,37 @@ class QuestionAnsweringModel:
         # Return the answer of the most similar question
         return data.iloc[most_similar_index]['answer']
 
+##### Please check this code for the app #####
+###########################EXTRA CODE#####################################
+#This is a more advanced version of the code that should use the tag in order 
+# to determin the part of the data frame that we need
+#We did not have enough time to completely run it in the ful app
+
+
+
+# # Interaction loop
+# while True:
+#     user_question = input("Ask a question (or type 'quit' to exit): ")
+#     if user_question.lower() == 'quit':
+#         break
+
+#     # preprocess the question
+#     preprocessed_question = preprocess_text(user_question)
+
+#     # predict the tag of the question
+#     tag = model.predict(tfidf_vectorizer.transform([preprocessed_question]))[0]
+
+#     # filter the dataset to only contain questions with the predicted tag
+#     df_filtered = df[df['tag'] == tag]
+
+#     # TF-IDF Vectorization on the filtered dataset
+#     X_filtered = tfidf_vectorizer.transform(df_filtered['preprocessed_questions'])
+
+#     # Find the most similar question and return its answer
+#     answer = find_most_similar_question(preprocessed_question, tfidf_vectorizer, X_filtered, df_filtered)
+
+#     print("Answer:", answer)
+
 
 
 # df = pd.read_csv("data/labeled-data.csv")
@@ -99,3 +130,5 @@ class QuestionAnsweringModel:
 # response = model.generate_response(question)
 # print("Question:", question)
 # print("Answer:", response)
+
+
