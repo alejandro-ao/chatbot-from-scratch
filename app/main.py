@@ -16,32 +16,25 @@ class ChatBot:
 
         load_dotenv()
 
-        st.set_page_config(page_title='Amazon Chatbot', page_icon=':robot:', initial_sidebar_state='auto')  
-
-        if "conversation" not in st.session_state:
-            st.session_state.conversation = self.get_conversation()
+        st.set_page_config(page_title='Amazon Chatbot',
+                           page_icon=':robot:', initial_sidebar_state='auto')
 
         if "history" not in st.session_state:
             st.session_state.history = [
-              {
-                "role": "bot",
-                "content": "Hello, I am an Amazon Sagework Expert. How can I help you?"
-              },
-              {
-                "role": "user",
-                "content": "What is Amazon Sagework?"
-              },
+                {
+                    "role": "bot",
+                    "content": "Hello, I am an Amazon Sagework Expert. How can I help you?"
+                }
             ]
 
         self.load_ui()
 
-    def get_conversation(self):
-        model = "blabla"
-        return model
+    def generate_response(self, user_question):
+        return "I won't talk to you until I get my coffee"
 
     def load_css_styles(self):
         st.write(css, unsafe_allow_html=True)
-        
+
     def display_sidebar(self):
         st.sidebar.title("Amazon Chatbot")
         st.sidebar.markdown(
@@ -53,9 +46,24 @@ class ChatBot:
     def display_messages(self, history):
         for message in history:
             if message['role'] == 'user':
-                st.markdown(user_template.replace('{{MSG}}', message['content']), unsafe_allow_html=True)
+                st.markdown(user_template.replace(
+                    '{{MSG}}', message['content']), unsafe_allow_html=True)
             else:
-                st.markdown(bot_template.replace('{{MSG}}', message['content']), unsafe_allow_html=True)
+                st.markdown(bot_template.replace(
+                    '{{MSG}}', message['content']), unsafe_allow_html=True)
+
+    def handle_user_input(self, user_question):
+        if user_question:
+            st.session_state.history.append({
+                "role": "user",
+                "content": user_question
+            })
+
+            response_content = self.generate_response(user_question)
+            st.session_state.history.append({
+                "role": "bot",
+                "content": response_content
+            })
 
     def load_ui(self):
         self.load_css_styles()
@@ -65,7 +73,7 @@ class ChatBot:
         st.title('Hello, I am an Amazon Sagework Expert 👩🏻‍🦰')
         user_question = st.text_input('Ask a question about Amazon Sagework:')
 
-        # self.handle_user_input(user_question)
+        self.handle_user_input(user_question)
 
         self.display_messages(st.session_state.history)
 
