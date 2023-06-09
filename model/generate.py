@@ -10,82 +10,94 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.metrics.pairwise import linear_kernel
 
-np.random.seed(42)
 
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('stopwords')
+class QuestionAnsweringModel:
+    def __init__(self, df):
+        nltk.download('punkt')
+        nltk.download('wordnet')
+        nltk.download('stopwords')
+        
+        model, tfidf_vectorizer, X = self.train_model(df)
+        question = "What is Amazon Sagemaker?"
+        response = self.generate_response(question, tfidf_vectorizer, X, df)
+        print("Question:", question)
+        print("Answer:", response)
 
-
-def preprocess_text(text):
-    text = text.lower()
-
-    text = re.sub(r'[^\w\s]', '', text)
-
-    words = nltk.word_tokenize(text)
-
-    lemmatizer = WordNetLemmatizer()
-
-    words = [lemmatizer.lemmatize(word) for word in words]
-
-    stop_words = set(stopwords.words('english'))
-
-    words = [word for word in words if word not in stop_words]
-
-    text = ' '.join(words).strip()
-
-    return text
-
-
-def train_model(df):
+        
+        
+        
   
-    df['preprocessed_questions'] = df['question'].apply(preprocess_text)
+    def preprocess_text(self, text):
+        text = text.lower()
 
-    # TF-IDF Vectorization
-    tfidf_vectorizer = TfidfVectorizer()
-    X = tfidf_vectorizer.fit_transform(df['preprocessed_questions'])
+        text = re.sub(r'[^\w\s]', '', text)
 
-    # Split into training and testing datasets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, df['tag'], test_size=0.2, random_state=42)
+        words = nltk.word_tokenize(text)
 
-    # Training a Random Forest Classifier
-    model = RandomForestClassifier()
-    model.fit(X_train, y_train)
+        lemmatizer = WordNetLemmatizer()
 
-    # Make predictions on the testing set
-    y_pred = model.predict(X_test)
+        words = [lemmatizer.lemmatize(word) for word in words]
 
-    # Calculate accuracy and print the classification report
-    accuracy = accuracy_score(y_test, y_pred)
-    print("Accuracy:", accuracy)
-    print(classification_report(y_test, y_pred))
+        stop_words = set(stopwords.words('english'))
 
-    return model, tfidf_vectorizer, X
+        words = [word for word in words if word not in stop_words]
+
+        text = ' '.join(words).strip()
+
+        return text
 
 
-def generate_response(question, tfidf_vectorizer, tfidf_matrix, data):
+    def train_model(self, df):
 
-    preprocessed_question = preprocess_text(question)
+        df['preprocessed_questions'] = df['question'].apply(self.preprocess_text)
 
-    question_vector = tfidf_vectorizer.transform([preprocessed_question])
+        # TF-IDF Vectorization
+        tfidf_vectorizer = TfidfVectorizer()
+        X = tfidf_vectorizer.fit_transform(df['preprocessed_questions'])
 
-    # Calculate cosine similarities between the input question and all questions in the dataset
-    cosine_similarities = linear_kernel(
-        question_vector, tfidf_matrix).flatten()
+        # Split into training and testing datasets
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, df['tag'], test_size=0.2, random_state=42)
 
-    # Find the index of the most similar question
-    most_similar_index = np.argmax(cosine_similarities)
+        # Training a Random Forest Classifier
+        model = RandomForestClassifier()
+        model.fit(X_train, y_train)
 
-    # Return the answer of the most similar question
-    return data.iloc[most_similar_index]['answer']
+        # Make predictions on the testing set
+        y_pred = model.predict(X_test)
 
+        # Calculate accuracy and print the classification report
+        accuracy = accuracy_score(y_test, y_pred)
+        print("Accuracy:", accuracy)
+        print(classification_report(y_test, y_pred))
+
+        return model, tfidf_vectorizer, X
+
+
+    def generate_response(self, question, tfidf_vectorizer, tfidf_matrix, data):
+
+        preprocessed_question = self.preprocess_text(question)
+
+        question_vector = tfidf_vectorizer.transform([preprocessed_question])
+
+        # Calculate cosine similarities between the input question and all questions in the dataset
+        cosine_similarities = linear_kernel(
+            question_vector, tfidf_matrix).flatten()
+
+        # Find the index of the most similar question
+        np.random.seed(42)
+        most_similar_index = np.argmax(cosine_similarities)
+
+        # Return the answer of the most similar question
+        return data.iloc[most_similar_index]['answer']
 
 df = pd.read_csv("data/labeled-data.csv")
-model, tfidf_vectorizer, X = train_model(df)
-question = "What deployment optins does Amazon Sagemaker have?"
-response = generate_response(question, tfidf_vectorizer, X, df)
-print("Question:", question)
-print("Answer:", response)
+question_answering_model = QuestionAnsweringModel(df)
 
 
+# df = pd.read_csv("data/labeled-data.csv")
+# model, tfidf_vectorizer, X = train_model(df)
+# question = "What is Amazon Sagemaker?"
+# response = generate_response(question, tfidf_vectorizer, X, df)
+# print("Question:", question)
+# print("Answer:", response)
