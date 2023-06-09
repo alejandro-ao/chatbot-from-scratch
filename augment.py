@@ -5,34 +5,31 @@ from dotenv import load_dotenv
 
 
 def paraphrase_sentence(sentence):
-    # Set up OpenAI API credentials
     load_dotenv()
     openai.api_key = os.getenv("OPENAI_API_KEY")
+    
+    initial_prompt = "You are an assistant that paraphrases sentences"
+    example_sentence = "What is a planet?"
+    example_paraphrase = "What is the definition of a planet?"
 
-    # Define the prompt and the maximum response length
-    prompt = "Paraphrase the following sentence:\n\"{}\"\n\nParaphrased version:".format(
-        sentence)
-    max_tokens = 50
-
-    # Generate paraphrased version using OpenAI GPT-3.5
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=max_tokens,
-        n=1,
-        stop=None,
-        temperature=0.7
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": initial_prompt},
+            {"role": "user", "content": "Paraphrase the following sentence:{}".format(example_sentence)},
+            {"role": "assistant", "content": example_paraphrase},
+            {"role": "user", "content": "Paraphrase the following sentence:{}".format(sentence)}
+        ]
     )
 
-    # Extract the paraphrased version from the response
-    paraphrased_sentence = response.choices[0].text.strip()
+    paraphrasis = completion.choices[0].message.content.strip()
 
-    return paraphrased_sentence
+    return paraphrasis
 
 
 def augment_df(df):
     # Create an empty dataframe to store augmented data
-    augmented_df = pd.DataFrame(columns=['question', 'answer'])
+    augmented_df = pd.DataFrame(columns=['question', 'answer', 'tag'])
 
     # Iterate over the rows of the original dataframe
     for index, row in df.iterrows():
@@ -42,11 +39,11 @@ def augment_df(df):
         tag = row['tag']
 
         # Add the original question and answer to the augmented dataframe
-        augmented_df = augmented_df.append(
-            {'question': row['question'], 'answer': row['answer'], 'tag': tag}, ignore_index=True)
-
+        augmented_df = pd.concat([augmented_df, pd.DataFrame(
+            {'question': [row['question']], 'answer': [row['answer']], 'tag': [tag]})], ignore_index=True)
+        
         # Add the paraphrased question and answer to the augmented dataframe
-        augmented_df = augmented_df.append(
-            {'question': paraphrased_question, 'answer': paraphrased_answer, 'tag': tag}, ignore_index=True)
+        augmented_df = pd.concat([augmented_df, pd.DataFrame(
+            {'question': [paraphrased_question], 'answer': [paraphrased_answer], 'tag': [tag]})], ignore_index=True)
 
     return augmented_df

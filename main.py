@@ -9,15 +9,9 @@ def get_json_data():
 
 
 def main():
-    df = get_json_data()
-    df['tag'] = 10
+    df = pd.read_csv("data/labeled-data.csv")
 
-    print("Original dataframe:", df.head())
-
-    augmented_df = augment_df(df.head())
-
-    print("Augmented dataframe:", augmented_df.head(10))
-
+    # augmented_df = augment_df(df)
 
 if __name__ == "__main__":
     main()
