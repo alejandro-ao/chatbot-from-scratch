@@ -2,12 +2,17 @@ import logging
 from dotenv import load_dotenv
 import streamlit as st
 from htmlTemplates import css, bot_template, user_template
+from generate import QuestionAnsweringModel
+import pandas as pd
 
 
 class ChatBot:
     def __init__(self):
         self.conversation = None
         self.history = None
+        
+        df = pd.read_csv("data/labeled-data.csv")
+        self.model = QuestionAnsweringModel(df)
 
     def main(self):
         logging.basicConfig(level=logging.INFO)
@@ -29,7 +34,8 @@ class ChatBot:
         self.load_ui()
 
     def generate_response(self, user_question):
-        return "I won't talk to you until I get my coffee"
+        response = self.model.generate_response(user_question)
+        return response
 
     def load_css_styles(self):
         st.write(css, unsafe_allow_html=True)

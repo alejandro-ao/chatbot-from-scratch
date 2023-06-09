@@ -18,14 +18,10 @@ class QuestionAnsweringModel:
         nltk.download('stopwords')
         
         model, tfidf_vectorizer, X = self.train_model(df)
-        question = "What is Amazon Sagemaker?"
-        response = self.generate_response(question, tfidf_vectorizer, X, df)
-        print("Question:", question)
-        print("Answer:", response)
-
         
-        
-        
+        self.model = model
+        self.tfidf_vectorizer = tfidf_vectorizer
+        self.X = X
   
     def preprocess_text(self, text):
         text = text.lower()
@@ -45,7 +41,6 @@ class QuestionAnsweringModel:
         text = ' '.join(words).strip()
 
         return text
-
 
     def train_model(self, df):
 
@@ -73,8 +68,11 @@ class QuestionAnsweringModel:
 
         return model, tfidf_vectorizer, X
 
+    def generate_response(self, question):
 
-    def generate_response(self, question, tfidf_vectorizer, tfidf_matrix, data):
+        tfidf_vectorizer = self.tfidf_vectorizer
+        tfidf_matrix = self.X
+        data = df
 
         preprocessed_question = self.preprocess_text(question)
 
@@ -91,13 +89,13 @@ class QuestionAnsweringModel:
         # Return the answer of the most similar question
         return data.iloc[most_similar_index]['answer']
 
+
+
 df = pd.read_csv("data/labeled-data.csv")
-question_answering_model = QuestionAnsweringModel(df)
+model = QuestionAnsweringModel(df)
 
 
-# df = pd.read_csv("data/labeled-data.csv")
-# model, tfidf_vectorizer, X = train_model(df)
-# question = "What is Amazon Sagemaker?"
-# response = generate_response(question, tfidf_vectorizer, X, df)
-# print("Question:", question)
-# print("Answer:", response)
+question = "What is Amazon Sagemaker?"
+response = model.generate_response(question)
+print("Question:", question)
+print("Answer:", response)
