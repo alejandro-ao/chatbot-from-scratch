@@ -16,11 +16,11 @@ class QuestionAnsweringModel:
         nltk.download('wordnet')
         nltk.download('stopwords')
         
-        model, tfidf_vectorizer, X = self.train_model(df)
+        model, tfidf_vectorizer, vectorized_questions, df = self.train_model(df)
         
         self.model = model
         self.tfidf_vectorizer = tfidf_vectorizer
-        self.X = X
+        self.vectorized_questions = vectorized_questions
         self.df = df
   
     def preprocess_text(self, text):
@@ -48,11 +48,10 @@ class QuestionAnsweringModel:
 
         # TF-IDF Vectorization
         tfidf_vectorizer = TfidfVectorizer()
-        X = tfidf_vectorizer.fit_transform(df['preprocessed_questions'])
+        vector_questions = tfidf_vectorizer.fit_transform(df['preprocessed_questions'])
 
         # Split into training and testing datasets
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, df['tag'], test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(vector_questions, df['tag'], test_size=0.2, random_state=42)
 
         # Training a Random Forest Classifier
         model = RandomForestClassifier()
@@ -66,69 +65,50 @@ class QuestionAnsweringModel:
         print("Accuracy:", accuracy)
         print(classification_report(y_test, y_pred))
 
-        return model, tfidf_vectorizer, X
+        return model, tfidf_vectorizer, vector_questions, df
 
     def generate_response(self, question):
 
         tfidf_vectorizer = self.tfidf_vectorizer
-        tfidf_matrix = self.X
+        tfidf_matrix = self.vectorized_questions
         data = self.df
-
+        
         preprocessed_question = self.preprocess_text(question)
+        vectorized_question = tfidf_vectorizer.transform([preprocessed_question])
+        
+        tag = self.model.predict(vectorized_question)[0]
+        
+        df_filtered = data[data['tag'] == tag]
+        
+        X_filtered = tfidf_vectorizer.transform(df_filtered['preprocessed_questions'])
+        
+        print("question:", question)
+        print("predicted tag:", tag)
+        print("predicted tag questions:", df_filtered['preprocessed_questions'])
+        print("predicted tag answers:", df_filtered['answer'])
 
         question_vector = tfidf_vectorizer.transform([preprocessed_question])
 
         # Calculate cosine similarities between the input question and all questions in the dataset
-        cosine_similarities = linear_kernel(
-            question_vector, tfidf_matrix).flatten()
-
+        cosine_similarities = linear_kernel(question_vector, X_filtered).flatten()
+        print("cosine_similarities:", cosine_similarities)
+        
         # Find the index of the most similar question
-        np.random.seed(42)
+        np.random.seed(41)
         most_similar_index = np.argmax(cosine_similarities)
+        print("most_similar_index:", most_similar_index)
 
         # Return the answer of the most similar question
-        return data.iloc[most_similar_index]['answer']
+        return df_filtered.iloc[most_similar_index]['answer']
 
-##### Please check this code for the app #####
-###########################EXTRA CODE#####################################
-#This is a more advanced version of the code that should use the tag in order 
-# to determin the part of the data frame that we need
-#We did not have enough time to completely run it in the ful app
+import pandas as pd
+df = pd.read_csv("data/final.csv", sep=";")
+model = QuestionAnsweringModel(df)
 
 
-
-# # Interaction loop
-# while True:
-#     user_question = input("Ask a question (or type 'quit' to exit): ")
-#     if user_question.lower() == 'quit':
-#         break
-
-#     # preprocess the question
-#     preprocessed_question = preprocess_text(user_question)
-
-#     # predict the tag of the question
-#     tag = model.predict(tfidf_vectorizer.transform([preprocessed_question]))[0]
-
-#     # filter the dataset to only contain questions with the predicted tag
-#     df_filtered = df[df['tag'] == tag]
-
-#     # TF-IDF Vectorization on the filtered dataset
-#     X_filtered = tfidf_vectorizer.transform(df_filtered['preprocessed_questions'])
-
-#     # Find the most similar question and return its answer
-#     answer = find_most_similar_question(preprocessed_question, tfidf_vectorizer, X_filtered, df_filtered)
-
-#     print("Answer:", answer)
-
-
-
-# df = pd.read_csv("data/labeled-data.csv")
-# model = QuestionAnsweringModel(df)
-
-
-# question = "What is Amazon Sagemaker?"
-# response = model.generate_response(question)
-# print("Question:", question)
-# print("Answer:", response)
+question = "Can I train ML models with data prepared in Data Wrangler?"
+response = model.generate_response(question)
+print("Question:", question)
+print("Answer:", response)
 
 
